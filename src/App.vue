@@ -16,20 +16,20 @@
     </v-toolbar>
 
     <v-content>
-      <upload-button />
+      <demo-form/>
     </v-content>
   </v-app>
 </template>
 
 <script>
 // import HelloWorld from './components/HelloWorld'
-import UploadButton from 'vuetify-upload-button'
+import DemoForm from './components/DemoForm'
 
 export default {
   name: 'App',
   components: {
     // HelloWorld,
-    UploadButton
+    DemoForm
   },
   data () {
     return {
