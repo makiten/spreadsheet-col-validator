@@ -8,11 +8,11 @@
       <v-flex xs12>
         <h1 class="headline">Upload Your File</h1>
         <upload-button
-           accept=".csv,.tsv"
-           :fileChangedCallback="fileChanged"
-           icon
-           dark
-         >
+          accept=".csv,.tsv"
+          :fileChangedCallback="fileChanged"
+          icon
+          dark
+        >
           <template slot="icon">
             <v-icon dark>add</v-icon>
           </template>
@@ -20,31 +20,49 @@
       </v-flex>
 
       <v-flex xs12 sm6 offset-sm3>
-        <v-list>
+        <v-list two-line>
           <draggable
-             v-model="origColumns"
-             :options="{draggable:'.item'}"
-             @start="drag = true"
-             @end="drag = false"
+            v-model="columns"
+            :options="{draggable:'.item'}"
+            @start="drag = true"
+            @end="drag = false"
+            @change="updateColumn"
           >
-            <template v-for="(value, key, index) in columns">
+            <template v-for="column in columns">
               <v-list-tile
-                 class="item"
-                 :key="key"
-                 @click=""
+                class="item"
+                :key="column.name"
+                @click=""
               >
                 <v-list-tile-content>
                   <v-text-field
-                     v-if="show[key]"
+                    v-if="column.show"
+                    :label="column.name"
+                    v-model="column.displayName"
                   >
                   </v-text-field>
-                  <span v-else>{{ value }}</span>
+                  <span v-else>{{ column.displayName }}</span>
                 </v-list-tile-content>
 
                 <v-list-tile-action>
+                  <template v-if="column.show">
+                    <v-btn
+                      icon
+                      @click="resetColumn(column)">
+                      <v-icon>close</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      @click="toggleRow(column)">
+                      <v-icon>check</v-icon>
+                    </v-btn>
+                  </template>
                   <v-btn
-                     icon
-                     @click="toggleRow(key)">
+                    icon
+                    @click="toggleRow(column)
+"
+                    v-else
+                  >
                     <v-icon>edit</v-icon>
                   </v-btn>
                 </v-list-tile-action>
@@ -72,9 +90,8 @@ export default {
     UploadButton
   },
   data: () => ({
-    columns: {},
-    origColumns: [],
-    show: {}
+    columns: [],
+    origColumns: []
   }),
   methods: {
     fileChanged (file) {
@@ -84,16 +101,24 @@ export default {
           columns: true,
           skip_empty_lines: true
         })
-        Object.keys(info[0]).forEach(c => {
-          this.columns[c] = c
-          this.show[c] = false
+        Object.keys(info[0]).forEach((c, idx) => {
+          this.columns.push({ name: c, displayName: c, show: false, initIndex: idx, index: idx })
+          this.origColumns.push({ name: c, index: idx })
         })
-        this.origColumns = Object.keys(info[0])
       }
       reader.readAsBinaryString(file)
     },
-    toggleRow (key) {
-      this.show[key] = !this.show[key]
+    resetColumn (column) {
+      column.displayName = column.name
+      column.show = !column.show
+    },
+    toggleRow (column) {
+      column.show = !column.show
+    },
+    updateColumn (e) {
+      const index = this.columns.findIndex(c => c.name === e.element.name)
+      this.columns[index].index = e.newIndex
+      console.log(e)
     }
   }
 }
